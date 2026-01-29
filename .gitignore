@@ -33,11 +33,15 @@ ios/.generated/
 
 # Archivos generados y caches
 .idea/
+.vscode/
 *.iml
 *.ipr
 *.iws
 .DS_Store
 Thumbs.db
+
+# Flutter metadata
+.metadata
 
 # Archivos de configuración local
 local.properties
