@@ -1,63 +1,156 @@
-# Eulalia App
+<div align="center">
+  <h1>Eulalia Mobile App</h1>
+  <p><b>Digital Voter ID Solution</b></p>
+</div>
+
+<div align="center">
+  <img src="https://img.shields.io/badge/built%20with-Flutter-blue.svg" alt="Built with Flutter">
+  <img src="https://img.shields.io/badge/blockchain-Cardano-blue" alt="Cardano">
+  <img src="https://img.shields.io/badge/ssi-Identus-indigo" alt="Identus">
+</div>
 
 ---
 
-## English
+### English Version
+# Project Digital Voter ID: Eulalia App
+**STATUS**: ACTIVE (Milestone 3)
 
-Eulalia App is a mobile application developed with Flutter and is a key component of the **"Digital Voter ID"** solution. It allows citizens to join a political party using Self-Sovereign Identity (SSI).
+### Table of Contents
+1. [Actors](#actors)
+2. [Project Phases](#project-phases)
+3. [Objective](#objective)
+4. [Functional Aspects](#functional-aspects)
+5. [Technical Aspects](#technical-aspects)
+6. [Installation Procedure](#installation-procedure)
+7. [Other Documents](#other-documents)
 
-### Description
+## Actors
+* **David Tacuri**
 
-This project, part of the **democracyonchain** initiative, leverages the power of Atala PRISM (Identus) and the Cardano blockchain to provide a secure, decentralized, and transparent platform. Citizens can manage their digital identity and use it to securely affiliate with a political party, ensuring privacy and control over their personal data.
+## Project Phases
+- [x] Planning (H1)
+- [x] Foundations & Governance (H2)
+- [/] Architecture & Infrastructure (H3 - CURRENT)
+- [ ] Proof of Concept - PoC (H4)
+- [ ] Project Closure
 
-### Main Features
+### Objective:
+Mobile application for citizens (Holders) to manage their Self-Sovereign Identity (SSI) and affiliate with political parties securely using the Cardano blockchain and Identus (Atala PRISM).
 
-*   **Self-Sovereign Identity:** Integration with Atala PRISM (Identus) for decentralized identity management.
-*   **Political Party Affiliation:** A clear and secure flow for a citizen to join a political party.
-*   **Blockchain Integration:** Uses the Cardano blockchain for transparent and immutable record-keeping.
-*   **Biometric Capture:** Enhances security during the identity verification process.
-*   **User-Controlled:** Empowers users with full control over their digital identity and data.
+### Target Audience:
+Citizens eligible for voting and political organizations.
 
-### Getting Started
+## Functional Aspects
+* **SSI Onboarding**: Decentralized identity creation through a 3-step secure process.
+* **Master Key Management**: Generation of 12-word seed phrases for self-sovereignty.
+* **Digital Wallet**: Secure storage and display of Decentralized Identifiers (DIDs) and Verifiable Credentials (VCs).
+* **Blockchain Anchoring**: Simulation and real anchoring of identities on the Cardano network.
 
-This project is a starting point for a Flutter application.
+## Technical Aspects
 
-A few resources to get you started if this is your first Flutter project:
+### Technological Platform
+| Feature               | Detail                                              |
+|-----------------------|-----------------------------------------------------|
+| Application Type      | Mobile Application (Flutter)                        |
+| Development Framework | Flutter / Dart                                      |
+| SSI Framework         | Atala Prism (Hyperledger Identus)                   |
+| Blockchain Network    | Cardano (Preview Net)                               |
+| State Management      | Custom UserSession Store                            |
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Prerequisites
+* [Flutter SDK v3.x+](https://docs.flutter.dev/get-started/install)
+* [Dart SDK](https://dart.dev/get-dart)
+* Android Studio / Xcode for emulators and building.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Installation
+* Clone the repository:
+```bash
+git clone https://github.com/democracyonchain/eulalia-app.git
+```
+* Install dependencies:
+```bash
+flutter pub get
+```
+* Run the application:
+```bash
+flutter run
+```
 
 ---
 
-## Español
+### Spanish Version
+# Proyecto Digital Voter ID: Eulalia App
+**ESTADO**: ACTIVO (Hito 3)
 
-Eulalia App es una aplicación móvil desarrollada con Flutter y es un componente clave de la solución **"Digital Voter ID"**. Permite a los ciudadanos afiliarse a un partido político utilizando Identidad Auto-Soberana (SSI).
+### Tabla de Contenidos
+1. [Actores](#actores-es)
+2. [Fases del Proyecto](#fases-es)
+3. [Objetivo](#objetivo-es)
+4. [Aspectos Funcionales](#aspectos-funcionales-es)
+5. [Aspectos Técnicos](#aspectos-técnicos-es)
+6. [Procedimiento de Instalación](#procedimiento-de-instalación-es)
+7. [Otros Documentos](#otros-documentos-es)
 
-### Descripción
+<a name="actores-es"></a>
+## Actores
+* **David Tacuri**
 
-Este proyecto, parte de la iniciativa **democracyonchain**, aprovecha el poder de Atala PRISM (Identus) y la blockchain de Cardano para proporcionar una plataforma segura, descentralizada y transparente. Los ciudadanos pueden gestionar su identidad digital y utilizarla para afiliarse de forma segura a un partido político, garantizando la privacidad y el control sobre sus datos personales.
+<a name="fases-es"></a>
+## Fases del Proyecto
+- [x] Planificación (H1)
+- [x] Cimientos y Gobernanza (H2)
+- [/] Arquitectura e Infraestructura (H3 - ACTUAL)
+- [ ] Prueba de Concepto - PoC (H4)
+- [ ] Cierre del Proyecto
 
-### Características Principales
+<a name="objetivo-es"></a>
+### Objetivo:
+Aplicación móvil para ciudadanos (Holders) que permite gestionar su Identidad Auto-Soberana (SSI) y afiliarse a organizaciones políticas de forma segura utilizando la blockchain de Cardano e Identus (Atala PRISM).
 
-*   **Identidad Auto-Soberana:** Integración con Atala PRISM (Identus) para la gestión de identidad descentralizada.
-*   **Afiliación a Partidos Políticos:** Un flujo claro y seguro para que un ciudadano se afilie a un partido político.
-*   **Integración con Blockchain:** Utiliza la blockchain de Cardano para un registro transparente e inmutable.
-*   **Captura Biométrica:** Mejora la seguridad durante el proceso de verificación de identidad.
-*   **Control del Usuario:** Otorga a los usuarios un control total sobre su identidad y datos digitales.
+### A quién va dirigido:
+Ciudadanos aptos para votar y organizaciones políticas.
 
-### Primeros Pasos
+<a name="aspectos-funcionales-es"></a>
+## Aspectos Funcionales
+* **Onboarding SSI**: Creación de identidad descentralizada mediante un proceso seguro de 3 pasos.
+* **Gestión de Llave Maestra**: Generación de frases semilla de 12 palabras para la auto-soberanía.
+* **Billetera Digital**: Almacenamiento y visualización segura de Identificadores Descentralizados (DIDs) y Credenciales Verificables (VCs).
+* **Anclaje en Blockchain**: Simulación y anclaje real de identidades en la red Cardano.
 
-Este proyecto es un punto de partida para una aplicación Flutter.
+<a name="aspectos-técnicos-es"></a>
+## Aspectos Técnicos
 
-Algunos recursos para comenzar si este es tu primer proyecto de Flutter:
+### Plataforma Tecnológica
+| Característica         | Detalle                                             |
+|------------------------|-----------------------------------------------------|
+| Tipo de Aplicación     | Aplicación Móvil (Flutter)                          |
+| Framework Desarrollo   | Flutter / Dart                                      |
+| Framework SSI          | Atala Prism (Hyperledger Identus)                   |
+| Red Blockchain         | Cardano (Preview Net)                               |
+| Gestión de Estado      | UserSession Store Personalizado                     |
 
-- [Lab: Escribe tu primera aplicación Flutter](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Muestras útiles de Flutter](https://docs.flutter.dev/cookbook)
+### Prerrequisitos
+* [Flutter SDK v3.x+](https://docs.flutter.dev/get-started/install)
+* [Dart SDK](https://dart.dev/get-dart)
+* Android Studio / Xcode para emuladores y compilación.
 
-Para obtener ayuda para comenzar con el desarrollo de Flutter, consulta la
-[documentación en línea](https://docs.flutter.dev/), que ofrece tutoriales,
-muestras, orientación sobre desarrollo móvil y una referencia completa de la API.
+<a name="procedimiento-de-instalación-es"></a>
+## Instalación
+* Clonar el repositorio:
+```bash
+git clone https://github.com/democracyonchain/eulalia-app.git
+```
+* Instalar dependencias:
+```bash
+flutter pub get
+```
+* Ejecutar la aplicación:
+```bash
+flutter run
+```
+
+<a name="otros-documentos-es"></a>
+## Otros Documentos
+* [Plan de Hitos](.requirements/VoterId_Milestone.md)
+* [Requerimientos de Software](.requirements/VoterId_Software_Requirements.md)
+* [Reportes de Progreso](.reportsAgents/)

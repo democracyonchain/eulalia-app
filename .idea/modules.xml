@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/eulalia_movil.iml" filepath="$PROJECT_DIR$/eulalia_movil.iml" />
-      <module fileurl="file://$PROJECT_DIR$/android/eulalia_movil_android.iml" filepath="$PROJECT_DIR$/android/eulalia_movil_android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/eulalia_app.iml" filepath="$PROJECT_DIR$/eulalia_app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/eulalia_app_android.iml" filepath="$PROJECT_DIR$/android/eulalia_app_android.iml" />
     </modules>
   </component>
 </project>
