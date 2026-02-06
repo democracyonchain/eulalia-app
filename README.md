@@ -129,6 +129,3 @@ Eulalia es la interfaz móvil principal del **Sistema VoterID**, diseñada para 
 1.  **Clonar**: `git clone https://github.com/democracyonchain/eulalia-app.git`
 2.  **Dependencies**: `flutter pub get`
 3.  **Ejecutar**: `flutter run`
-
----
-**David Tacuri** | Project Catalyst Fund 12 | 2026
