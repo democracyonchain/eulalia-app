@@ -1,156 +1,131 @@
 <div align="center">
-  <h1>Eulalia Mobile App</h1>
-  <p><b>Digital Voter ID Solution</b></p>
+  <a href="https://flutter.dev/" target="_blank">
+    <img src="https://storage.googleapis.com/cms-storage-bucket/flutter-logo.6a07d8a62f4308d2b854.svg" width="200" alt="Flutter Logo" />
+  </a> 
+</div>
+<div align="center"> 
+  <a href="https://flutter.dev/" target="_blank">
+    <img src="https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter" alt="Flutter Version">
+  </a>
+  <a href="https://dart.dev/" target="_blank">
+    <img src="https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart" alt="Dart Version">
+  </a>
+  <img src="https://img.shields.io/badge/Architecture-Clean-blue" alt="Clean Architecture">
 </div>
 
-<div align="center">
-  <img src="https://img.shields.io/badge/built%20with-Flutter-blue.svg" alt="Built with Flutter">
-  <img src="https://img.shields.io/badge/blockchain-Cardano-blue" alt="Cardano">
-  <img src="https://img.shields.io/badge/ssi-Identus-indigo" alt="Identus">
-</div>
+# Eulalia Mobile App - VoterID
+**STATUS**: ACTIVE (Architecture & Infrastructure)
 
 ---
 
-### English Version
-# Project Digital Voter ID: Eulalia App
-**STATUS**: ACTIVE (Milestone 3)
+## (EN) English Version
+
+### Decentralized Identity & Voting Mobile App
+
+Eulalia is the core mobile interface of the **VoterID System**, empowering citizens with **Self-Sovereign Identity (SSI)**. It provides a secure digital wallet for managing identity credentials and facilitating political participation with absolute transparency.
 
 ### Table of Contents
-1. [Actors](#actors)
-2. [Project Phases](#project-phases)
-3. [Objective](#objective)
-4. [Functional Aspects](#functional-aspects)
-5. [Technical Aspects](#technical-aspects)
-6. [Installation Procedure](#installation-procedure)
-7. [Other Documents](#other-documents)
+1. [Actors](#actors-en)
+2. [Project Phases](#project-phases-en)
+3. [Functional Aspects](#functional-aspects-en)
+4. [Technical Aspects](#technical-aspects-en)
+5. [Installation Procedure](#installation-procedure-en)
 
-## Actors
-* **David Tacuri**
+<a name="actors-en"></a>
+### Actors
+* **David Tacuri** (Lead Developer)
 
-## Project Phases
-- [x] Planning (H1)
-- [x] Foundations & Governance (H2)
-- [/] Architecture & Infrastructure (H3 - CURRENT)
-- [ ] Proof of Concept - PoC (H4)
-- [ ] Project Closure
+<a name="project-phases-en"></a>
+### Project Phases
+- [x] **H1: Planning & Design**: Architecture and SRS definition.
+- [x] **H2: Foundations & Governance**: Environment setup and repository structure.
+- [/] **H3: Architecture & Infrastructure**: UI/UX finalization and Atala Prism integration (**CURRENT**).
+- [ ] **H4: Proof of Concept (POC)**: Implementation of affiliation logic and interoperability tests.
 
-### Objective:
-Mobile application for citizens (Holders) to manage their Self-Sovereign Identity (SSI) and affiliate with political parties securely using the Cardano blockchain and Identus (Atala PRISM).
+<a name="functional-aspects-en"></a>
+### Functional Aspects
+*   **SSI Wallet**: Secure management of DIDs and Verifiable Credentials (VCs).
+*   **Onboarding Flow**: 3-step secure registration process.
+*   **Master Key Sovereignty**: Support for 12-word recovery phrases.
+*   **Political Affiliation**: Browse and affiliate with verified political organizations.
+*   **QR Scanner**: Quick scanning for identity invitations and credential verification.
 
-### Target Audience:
-Citizens eligible for voting and political organizations.
+<a name="technical-aspects-en"></a>
+### Technical Aspects
 
-## Functional Aspects
-* **SSI Onboarding**: Decentralized identity creation through a 3-step secure process.
-* **Master Key Management**: Generation of 12-word seed phrases for self-sovereignty.
-* **Digital Wallet**: Secure storage and display of Decentralized Identifiers (DIDs) and Verifiable Credentials (VCs).
-* **Blockchain Anchoring**: Simulation and real anchoring of identities on the Cardano network.
+#### Technological Platform
+| Feature | Detail |
+| :--- | :--- |
+| **Framework** | Flutter / Dart |
+| **SSI Framework** | Atala Prism (Hyperledger Identus) |
+| **Blockchain** | Cardano (Preview Net) |
+| **State Management** | Provider-based Session Store |
+| **Network** | Dio with JWT Interceptors |
 
-## Technical Aspects
+#### Prerequisites
+- **Flutter SDK v3.x+**
+- **Eulalia Backend**: Must be running (Default: `http://localhost:5000`).
+- **Identus Cloud Agent**: Required for DID issuance.
 
-### Technological Platform
-| Feature               | Detail                                              |
-|-----------------------|-----------------------------------------------------|
-| Application Type      | Mobile Application (Flutter)                        |
-| Development Framework | Flutter / Dart                                      |
-| SSI Framework         | Atala Prism (Hyperledger Identus)                   |
-| Blockchain Network    | Cardano (Preview Net)                               |
-| State Management      | Custom UserSession Store                            |
-
-### Prerequisites
-* [Flutter SDK v3.x+](https://docs.flutter.dev/get-started/install)
-* [Dart SDK](https://dart.dev/get-dart)
-* Android Studio / Xcode for emulators and building.
-
-## Installation
-* Clone the repository:
-```bash
-git clone https://github.com/democracyonchain/eulalia-app.git
-```
-* Install dependencies:
-```bash
-flutter pub get
-```
-* Run the application:
-```bash
-flutter run
-```
+<a name="installation-procedure-en"></a>
+### Installation Procedure
+1.  **Clone**: `git clone https://github.com/democracyonchain/eulalia-app.git`
+2.  **Dependencies**: `flutter pub get`
+3.  **Run**: `flutter run`
 
 ---
 
-### Spanish Version
-# Proyecto Digital Voter ID: Eulalia App
-**ESTADO**: ACTIVO (Hito 3)
+## (ES) Versión en Español
+
+### App Móvil de Identidad y Votación Descentralizada
+
+Eulalia es la interfaz móvil principal del **Sistema VoterID**, diseñada para empoderar a los ciudadanos con **Identidad Soberana (SSI)**. Proporciona una billetera digital segura para gestionar credenciales de identidad y facilitar la participación política con transparencia absoluta.
 
 ### Tabla de Contenidos
 1. [Actores](#actores-es)
 2. [Fases del Proyecto](#fases-es)
-3. [Objetivo](#objetivo-es)
-4. [Aspectos Funcionales](#aspectos-funcionales-es)
-5. [Aspectos Técnicos](#aspectos-técnicos-es)
-6. [Procedimiento de Instalación](#procedimiento-de-instalación-es)
-7. [Otros Documentos](#otros-documentos-es)
+3. [Aspectos Funcionales](#aspectos-funcionales-es)
+4. [Aspectos Técnicos](#aspectos-tecnicos-es)
+5. [Procedimiento de Instalación](#procedimiento-instalacion-es)
 
 <a name="actores-es"></a>
-## Actores
-* **David Tacuri**
+### Actores
+* **David Tacuri** (Desarrollador Principal)
 
 <a name="fases-es"></a>
-## Fases del Proyecto
-- [x] Planificación (H1)
-- [x] Cimientos y Gobernanza (H2)
-- [/] Arquitectura e Infraestructura (H3 - ACTUAL)
-- [ ] Prueba de Concepto - PoC (H4)
-- [ ] Cierre del Proyecto
-
-<a name="objetivo-es"></a>
-### Objetivo:
-Aplicación móvil para ciudadanos (Holders) que permite gestionar su Identidad Auto-Soberana (SSI) y afiliarse a organizaciones políticas de forma segura utilizando la blockchain de Cardano e Identus (Atala PRISM).
-
-### A quién va dirigido:
-Ciudadanos aptos para votar y organizaciones políticas.
+### Fases del Proyecto
+- [x] **H1: Planificación y Diseño**: Definición de arquitectura y SRS.
+- [x] **H2: Cimientos y Gobernanza**: Configuración de entorno y estructura de repositorios.
+- [/] **H3: Architecture & Infrastructure**: Finalización de UI/UX e integración con Atala Prism (**ACTUAL**).
+- [ ] **H4: Prueba de Concepto (POC)**: Implementación de lógica de afiliación y pruebas de interoperabilidad.
 
 <a name="aspectos-funcionales-es"></a>
-## Aspectos Funcionales
-* **Onboarding SSI**: Creación de identidad descentralizada mediante un proceso seguro de 3 pasos.
-* **Gestión de Llave Maestra**: Generación de frases semilla de 12 palabras para la auto-soberanía.
-* **Billetera Digital**: Almacenamiento y visualización segura de Identificadores Descentralizados (DIDs) y Credenciales Verificables (VCs).
-* **Anclaje en Blockchain**: Simulación y anclaje real de identidades en la red Cardano.
+### Aspectos Funcionales
+*   **Billetera SSI**: Gestión segura de DIDs y Credenciales Verificables (VCs).
+*   **Flujo de Onboarding**: Proceso de registro seguro en 3 pasos.
+*   **Soberanía de Llaves**: Soporte para frases de recuperación de 12 palabras.
+*   **Afiliación Política**: Búsqueda y afiliación a organizaciones políticas verificadas.
+*   **Escáner QR**: Escaneo rápido de invitaciones de identidad y verificación de credenciales.
 
-<a name="aspectos-técnicos-es"></a>
-## Aspectos Técnicos
+<a name="aspectos-tecnicos-es"></a>
+### Aspectos Técnicos
 
-### Plataforma Tecnológica
-| Característica         | Detalle                                             |
-|------------------------|-----------------------------------------------------|
-| Tipo de Aplicación     | Aplicación Móvil (Flutter)                          |
-| Framework Desarrollo   | Flutter / Dart                                      |
-| Framework SSI          | Atala Prism (Hyperledger Identus)                   |
-| Red Blockchain         | Cardano (Preview Net)                               |
-| Gestión de Estado      | UserSession Store Personalizado                     |
+#### Plataforma Tecnológica
+| Característica | Detalle |
+| :--- | :--- |
+| **Framework** | Flutter / Dart |
+| **Framework SSI** | Atala Prism (Hyperledger Identus) |
+| **Blockchain** | Cardano (Preview Net) |
+| **Gestión de Estado** | Session Store basado en Provider |
+| **Red** | Dio con Interceptores JWT |
 
-### Prerrequisitos
-* [Flutter SDK v3.x+](https://docs.flutter.dev/get-started/install)
-* [Dart SDK](https://dart.dev/get-dart)
-* Android Studio / Xcode para emuladores y compilación.
+#### Requisitos Previos
+- **Flutter SDK v3.x+**
+- **Eulalia Backend**: Debe estar activo (Predeterminado: `http://localhost:5000`).
+- **Identus Cloud Agent**: Requerido para la emisión de DIDs.
 
-<a name="procedimiento-de-instalación-es"></a>
-## Instalación
-* Clonar el repositorio:
-```bash
-git clone https://github.com/democracyonchain/eulalia-app.git
-```
-* Instalar dependencias:
-```bash
-flutter pub get
-```
-* Ejecutar la aplicación:
-```bash
-flutter run
-```
-
-<a name="otros-documentos-es"></a>
-## Otros Documentos
-* [Plan de Hitos](.requirements/VoterId_Milestone.md)
-* [Requerimientos de Software](.requirements/VoterId_Software_Requirements.md)
-* [Reportes de Progreso](.reportsAgents/)
+<a name="procedimiento-instalacion-es"></a>
+### Procedimiento de Instalación
+1.  **Clonar**: `git clone https://github.com/democracyonchain/eulalia-app.git`
+2.  **Dependencies**: `flutter pub get`
+3.  **Ejecutar**: `flutter run`
