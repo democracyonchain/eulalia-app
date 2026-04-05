@@ -7,43 +7,21 @@ class SSIService {
 
   SSIService({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
 
-  /// GET /api/SSI
-  /// Listar credenciales emitidas
-  Future<List<SSIDto>> getAll() async {
+  Future<SSIInvitationDto> requestInvitation(String cedula) async {
     try {
-      final response = await _apiClient.get('/api/SSI');
-      final List<dynamic> data = response.data as List<dynamic>;
-      return data.map((json) => SSIDto.fromJson(json)).toList();
+      final response = await _apiClient.post('/api/SSI/invitation/$cedula');
+      return SSIInvitationDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      throw Exception('Error al obtener credenciales SSI: ${e.message}');
+      throw Exception('Error al solicitar invitación SSI: ${e.message}');
     }
   }
 
-  /// POST /api/SSI
-  /// Registrar metadatos SSI (Fase 1 - CRUD)
-  Future<SSIDto> create(SSIDto ssi) async {
+  Future<SSIStatusDto> getStatus(String cedula) async {
     try {
-      final response = await _apiClient.post(
-        '/api/SSI',
-        data: ssi.toJson(),
-      );
-      return SSIDto.fromJson(response.data);
+      final response = await _apiClient.get('/api/SSI/status/$cedula');
+      return SSIStatusDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      throw Exception('Error al crear registro SSI: ${e.message}');
-    }
-  }
-
-  /// GET /api/SSI/{id}
-  /// Obtener detalle de una credencial SSI
-  Future<SSIDto> getById(int id) async {
-    try {
-      final response = await _apiClient.get('/api/SSI/$id');
-      return SSIDto.fromJson(response.data);
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 404) {
-        throw Exception('Credencial SSI no encontrada');
-      }
-      throw Exception('Error al obtener credencial SSI: ${e.message}');
+      throw Exception('Error al consultar estado SSI: ${e.message}');
     }
   }
 }

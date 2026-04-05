@@ -81,7 +81,7 @@ class WalletPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryBlue.withOpacity(0.3),
+            color: AppColors.primaryBlue.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -98,7 +98,7 @@ class WalletPage extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -126,7 +126,7 @@ class WalletPage extends StatelessWidget {
           Text(
             identity?.did ?? 'did:prism:hold_identity_a7x9_demo',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontSize: 12,
               fontFamily: 'monospace',
             ),
@@ -151,7 +151,7 @@ class WalletPage extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withValues(alpha: 0.6),
             fontSize: 10,
             fontWeight: FontWeight.bold,
           ),
@@ -176,14 +176,14 @@ class WalletPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.1)),
+        border: Border.all(color: color.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(15),
             ),
             child: Icon(icon, color: color, size: 24),
@@ -213,7 +213,7 @@ class WalletPage extends StatelessWidget {
             ),
           ),
           Icon(Icons.chevron_right,
-              color: AppColors.textSecondary.withOpacity(0.3)),
+              color: AppColors.textSecondary.withValues(alpha: 0.3)),
         ],
       ),
     );

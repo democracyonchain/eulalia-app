@@ -26,7 +26,7 @@ class ScannerPage extends StatelessWidget {
                     child: Container(
                       width: 200,
                       height: 2,
-                      color: AppColors.primaryBlue.withOpacity(0.5),
+                      color: AppColors.primaryBlue.withValues(alpha: 0.5),
                       // This could be animated in a real implementation
                     ),
                   ),
@@ -34,7 +34,10 @@ class ScannerPage extends StatelessWidget {
                 const SizedBox(height: 48),
                 const Text(
                   'Escanea el código QR',
-                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 const Text(

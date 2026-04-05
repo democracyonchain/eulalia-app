@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'dart:convert';
 import 'package:eulalia_app/core/network/api_client.dart';
 import 'package:eulalia_app/features/scanner/data/models/biometria_model.dart';
 
@@ -27,6 +28,34 @@ class BiometriaService {
         throw Exception('No tiene permisos para registrar biometría');
       }
       throw Exception('Error al registrar biometría: ${e.message}');
+    }
+  }
+
+  Future<void> registerSelf({
+    required String cedula,
+    required List<double> embedding,
+    required double livenessScore,
+    required String modelVersion,
+  }) async {
+    try {
+      final embeddingBytes = utf8.encode(embedding.join(','));
+      final embeddingBase64 = base64Encode(embeddingBytes);
+
+      await _apiClient.post(
+        '/api/Biometria/enroll-self',
+        data: {
+          'cedula': cedula,
+          'embeddingBase64': embeddingBase64,
+          'livenessScore': livenessScore,
+          'modelVersion': modelVersion,
+        },
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 403) {
+        throw Exception('No autorizado para registrar biometría propia');
+      }
+      throw Exception(
+          'Error al registrar biometría self-service: ${e.message}');
     }
   }
 

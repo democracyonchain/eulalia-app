@@ -32,6 +32,7 @@ ios/Runner.xcodeproj/xcuserdata/
 ios/.generated/
 
 # Archivos generados y caches
+.gradle-home/
 .idea/
 .vscode/
 *.iml
