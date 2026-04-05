@@ -45,6 +45,12 @@ dependencies:
   # JWT token decoding
   jwt_decoder: ^2.0.1
 
+  # Camera capture for on-device biometric pipeline
+  camera: ^0.11.1
+
+  # Image processing for quality/liveness heuristics
+  image: ^4.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

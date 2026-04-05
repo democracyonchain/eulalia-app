@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:eulalia_app/core/constants/app_colors.dart';
+import 'package:eulalia_app/core/store/user_session.dart';
+import 'package:eulalia_app/features/affiliation/data/models/afiliacion_model.dart';
+import 'package:eulalia_app/features/affiliation/data/services/afiliacion_service.dart';
 
 class AffiliationPage extends StatefulWidget {
   const AffiliationPage({super.key});
@@ -10,7 +13,10 @@ class AffiliationPage extends StatefulWidget {
 
 class _AffiliationPageState extends State<AffiliationPage> {
   final TextEditingController _searchController = TextEditingController();
+  final AfiliacionService _afiliacionService = AfiliacionService();
   String _searchQuery = '';
+  bool _loading = false;
+  int? _activeAffiliacionId;
 
   // Static data for demonstration
   final List<Map<String, dynamic>> _allParties = [
@@ -52,7 +58,36 @@ class _AffiliationPageState extends State<AffiliationPage> {
     },
   ];
 
-  String? _affiliatedPartyId = '1'; // Initially affiliated to '1'
+  String? _affiliatedPartyId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentAffiliation();
+  }
+
+  Future<void> _loadCurrentAffiliation() async {
+    final dni = UserSession().currentIdentity?.dni;
+    if (dni == null) return;
+
+    setState(() => _loading = true);
+    try {
+      final all = await _afiliacionService.getAll();
+      final current =
+          all.where((a) => a.cedula == dni && a.estado != 'Anulado');
+      if (current.isNotEmpty) {
+        final active = current.first;
+        setState(() {
+          _affiliatedPartyId = active.organizacionId.toString();
+          _activeAffiliacionId = active.afiliacionId;
+        });
+      }
+    } catch (_) {
+      // Keep page usable even if lookup fails.
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   void _showConfirmationDialog(Map<String, dynamic> party, bool isAffiliating) {
     final passwordController = TextEditingController();
@@ -91,7 +126,7 @@ class _AffiliationPageState extends State<AffiliationPage> {
               decoration: InputDecoration(
                 hintText: 'Ingrese su PIN',
                 filled: true,
-                fillColor: Colors.black.withOpacity(0.05),
+                fillColor: Colors.black.withValues(alpha: 0.05),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -108,13 +143,15 @@ class _AffiliationPageState extends State<AffiliationPage> {
           ),
           ElevatedButton(
             onPressed: () {
-              if (passwordController.text == '1234') {
+              final expectedPin = UserSession().currentIdentity?.pin;
+              if (expectedPin != null &&
+                  passwordController.text == expectedPin) {
                 Navigator.pop(context);
                 _executeAction(party['id'], isAffiliating);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Contraseña incorrecta. Intente con 1234'),
+                    content: Text('PIN de transacción incorrecto'),
                     backgroundColor: AppColors.error,
                   ),
                 );
@@ -133,23 +170,57 @@ class _AffiliationPageState extends State<AffiliationPage> {
     );
   }
 
-  void _executeAction(String partyId, bool isAffiliating) {
-    setState(() {
-      if (isAffiliating) {
-        _affiliatedPartyId = partyId;
-      } else {
-        _affiliatedPartyId = null;
-      }
-    });
+  Future<void> _executeAction(String partyId, bool isAffiliating) async {
+    final dni = UserSession().currentIdentity?.dni;
+    if (dni == null) {
+      _showMessage('No hay sesión activa de ciudadano', isError: true);
+      return;
+    }
 
-    final partyName = _allParties.firstWhere((p) => p['id'] == partyId)['name'];
+    setState(() => _loading = true);
+    try {
+      if (isAffiliating) {
+        final created = await _afiliacionService.create(
+          CreateAfiliacionRequest(
+            cedula: dni,
+            organizacionId: int.parse(partyId),
+          ),
+        );
+        setState(() {
+          _affiliatedPartyId = partyId;
+          _activeAffiliacionId = created.afiliacionId;
+        });
+        final partyName =
+            _allParties.firstWhere((p) => p['id'] == partyId)['name'];
+        _showMessage('Afiliación registrada en $partyName');
+      } else {
+        final activeId = _activeAffiliacionId;
+        if (activeId == null) {
+          _showMessage('No existe afiliación activa para anular',
+              isError: true);
+          return;
+        }
+        await _afiliacionService.cancel(activeId);
+        final partyName =
+            _allParties.firstWhere((p) => p['id'] == partyId)['name'];
+        setState(() {
+          _affiliatedPartyId = null;
+          _activeAffiliacionId = null;
+        });
+        _showMessage('Afiliación anulada para $partyName');
+      }
+    } catch (e) {
+      _showMessage(e.toString(), isError: true);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  void _showMessage(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(isAffiliating
-            ? 'Te has afiliado exitosamente a $partyName'
-            : 'Has cancelado tu afiliación a $partyName'),
-        backgroundColor:
-            isAffiliating ? AppColors.success : AppColors.textSecondary,
+        content: Text(message),
+        backgroundColor: isError ? AppColors.error : AppColors.success,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -176,6 +247,7 @@ class _AffiliationPageState extends State<AffiliationPage> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
             child: TextField(
+              enabled: !_loading,
               controller: _searchController,
               onChanged: (value) => setState(() => _searchQuery = value),
               decoration: InputDecoration(
@@ -193,14 +265,16 @@ class _AffiliationPageState extends State<AffiliationPage> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(24),
-              itemCount: filteredParties.length,
-              itemBuilder: (context, index) {
-                final party = filteredParties[index];
-                return _buildPartyCard(party);
-              },
-            ),
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    padding: const EdgeInsets.all(24),
+                    itemCount: filteredParties.length,
+                    itemBuilder: (context, index) {
+                      final party = filteredParties[index];
+                      return _buildPartyCard(party);
+                    },
+                  ),
           ),
         ],
       ),
@@ -218,13 +292,13 @@ class _AffiliationPageState extends State<AffiliationPage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
         border: isThisAffiliated
-            ? Border.all(color: party['color'].withOpacity(0.5), width: 2)
+            ? Border.all(color: party['color'].withValues(alpha: 0.5), width: 2)
             : null,
       ),
       child: Column(
@@ -236,7 +310,7 @@ class _AffiliationPageState extends State<AffiliationPage> {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: party['color'].withOpacity(0.1),
+                  color: party['color'].withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: party['imagePath'] != null
@@ -315,7 +389,7 @@ class _AffiliationPageState extends State<AffiliationPage> {
                       foregroundColor: Colors.white,
                       disabledBackgroundColor: AppColors.surface,
                       disabledForegroundColor:
-                          AppColors.textSecondary.withOpacity(0.5),
+                          AppColors.textSecondary.withValues(alpha: 0.5),
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(

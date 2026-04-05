@@ -22,7 +22,6 @@ class EulaliaApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppColors.primaryBlue,
           primary: AppColors.primaryBlue,
-          background: AppColors.background,
         ),
         useMaterial3: true,
       ),

@@ -1,43 +1,49 @@
-class SSIDto {
-  final int? ssiId;
-  final String cedula;
-  final String? did;
-  final String? schemaId;
-  final String? credentialId;
-  final DateTime fechaEmision;
-  final String estado;
+class SSIInvitationDto {
+  final String invitationId;
+  final String invitationUrl;
+  final String status;
+  final DateTime? expiresAt;
 
-  SSIDto({
-    this.ssiId,
-    required this.cedula,
-    this.did,
-    this.schemaId,
-    this.credentialId,
-    required this.fechaEmision,
-    required this.estado,
+  SSIInvitationDto({
+    required this.invitationId,
+    required this.invitationUrl,
+    required this.status,
+    this.expiresAt,
   });
 
-  factory SSIDto.fromJson(Map<String, dynamic> json) {
-    return SSIDto(
-      ssiId: json['ssi_Id'] as int?,
-      cedula: json['cedula'] as String,
-      did: json['did'] as String?,
-      schemaId: json['schemaId'] as String?,
-      credentialId: json['credentialId'] as String?,
-      fechaEmision: DateTime.parse(json['fecha_Emision'] as String),
-      estado: json['estado'] as String,
+  factory SSIInvitationDto.fromJson(Map<String, dynamic> json) {
+    return SSIInvitationDto(
+      invitationId: json['invitationId'] as String? ?? '',
+      invitationUrl: json['invitationUrl'] as String? ?? '',
+      status: json['status'] as String? ?? 'Unknown',
+      expiresAt: json['expiresAt'] != null
+          ? DateTime.tryParse(json['expiresAt'] as String)
+          : null,
     );
   }
+}
 
-  Map<String, dynamic> toJson() {
-    return {
-      if (ssiId != null) 'ssi_Id': ssiId,
-      'cedula': cedula,
-      'did': did,
-      'schemaId': schemaId,
-      'credentialId': credentialId,
-      'fecha_Emision': fechaEmision.toIso8601String(),
-      'estado': estado,
-    };
+class SSIStatusDto {
+  final String status;
+  final DateTime? lastUpdated;
+  final String? details;
+  final String? error;
+
+  SSIStatusDto({
+    required this.status,
+    this.lastUpdated,
+    this.details,
+    this.error,
+  });
+
+  factory SSIStatusDto.fromJson(Map<String, dynamic> json) {
+    return SSIStatusDto(
+      status: json['status'] as String? ?? 'Unknown',
+      lastUpdated: json['lastUpdated'] != null
+          ? DateTime.tryParse(json['lastUpdated'] as String)
+          : null,
+      details: json['details'] as String?,
+      error: json['error'] as String?,
+    );
   }
 }
