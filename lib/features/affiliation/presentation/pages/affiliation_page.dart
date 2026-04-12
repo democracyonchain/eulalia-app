@@ -1,8 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:eulalia_app/core/constants/app_colors.dart';
 import 'package:eulalia_app/core/store/user_session.dart';
 import 'package:eulalia_app/features/affiliation/data/models/afiliacion_model.dart';
+import 'package:eulalia_app/features/affiliation/data/models/organizacion_model.dart';
 import 'package:eulalia_app/features/affiliation/data/services/afiliacion_service.dart';
+import 'package:eulalia_app/features/affiliation/data/services/organizacion_service.dart';
+import 'package:flutter/material.dart';
 
 class AffiliationPage extends StatefulWidget {
   const AffiliationPage({super.key});
@@ -14,82 +16,72 @@ class AffiliationPage extends StatefulWidget {
 class _AffiliationPageState extends State<AffiliationPage> {
   final TextEditingController _searchController = TextEditingController();
   final AfiliacionService _afiliacionService = AfiliacionService();
+  final OrganizacionService _organizacionService = OrganizacionService();
+
+  final List<Color> _palette = [
+    AppColors.primaryBlue,
+    AppColors.success,
+    AppColors.warning,
+    AppColors.error,
+    Colors.indigo,
+    Colors.teal,
+  ];
+
+  final List<IconData> _icons = [
+    Icons.shield,
+    Icons.groups,
+    Icons.how_to_vote,
+    Icons.account_balance,
+    Icons.public,
+    Icons.campaign,
+  ];
+
   String _searchQuery = '';
   bool _loading = false;
   int? _activeAffiliacionId;
-
-  // Static data for demonstration
-  final List<Map<String, dynamic>> _allParties = [
-    {
-      'id': '1',
-      'name': 'Partido Demócrata',
-      'description': 'Libertad y progreso para todos los ciudadanos.',
-      'color': AppColors.primaryBlue,
-      'imagePath': 'assets/images/logos/logo_democrata.png',
-      'icon': Icons.shield,
-    },
-    {
-      'id': '2',
-      'name': 'Unión Nacional',
-      'description': 'Comprometidos con la unidad y el desarrollo sostenible.',
-      'color': AppColors.success,
-      'icon': Icons.eco,
-    },
-    {
-      'id': '3',
-      'name': 'Frente Progresista',
-      'description': 'Innovación social y justicia para el pueblo.',
-      'color': AppColors.error,
-      'icon': Icons.account_balance_rounded,
-    },
-    {
-      'id': '4',
-      'name': 'Alianza Ciudadana',
-      'description': 'Transparencia y rendición de cuentas.',
-      'color': AppColors.warning,
-      'icon': Icons.groups,
-    },
-    {
-      'id': '5',
-      'name': 'Movimiento Futuro',
-      'description': 'Tecnología y ecología para las nuevas generaciones.',
-      'color': Colors.purple,
-      'icon': Icons.auto_awesome,
-    },
-  ];
-
-  String? _affiliatedPartyId;
+  int? _affiliatedOrganizacionId;
+  List<OrganizacionDto> _organizaciones = [];
 
   @override
   void initState() {
     super.initState();
-    _loadCurrentAffiliation();
+    _loadData();
   }
 
-  Future<void> _loadCurrentAffiliation() async {
+  Future<void> _loadData() async {
     final dni = UserSession().currentIdentity?.dni;
     if (dni == null) return;
 
     setState(() => _loading = true);
     try {
-      final all = await _afiliacionService.getAll();
-      final current =
-          all.where((a) => a.cedula == dni && a.estado != 'Anulado');
-      if (current.isNotEmpty) {
-        final active = current.first;
-        setState(() {
-          _affiliatedPartyId = active.organizacionId.toString();
-          _activeAffiliacionId = active.afiliacionId;
-        });
-      }
-    } catch (_) {
-      // Keep page usable even if lookup fails.
+      final results = await Future.wait([
+        _organizacionService.getAll(),
+        _afiliacionService.getAll(),
+      ]);
+
+      final organizaciones = results[0] as List<OrganizacionDto>;
+      final afiliaciones = results[1] as List<AfiliacionDto>;
+
+      final activa =
+          afiliaciones.where((a) => a.cedula == dni && a.estado != 'Anulado');
+
+      setState(() {
+        _organizaciones = organizaciones
+            .where((o) => o.estado.toLowerCase() == 'aprobado')
+            .toList();
+        if (activa.isNotEmpty) {
+          _activeAffiliacionId = activa.first.afiliacionId;
+          _affiliatedOrganizacionId = activa.first.organizacionId;
+        }
+      });
+    } catch (e) {
+      _showMessage(e.toString(), isError: true);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  void _showConfirmationDialog(Map<String, dynamic> party, bool isAffiliating) {
+  void _showConfirmationDialog(OrganizacionDto org, bool isAffiliating) {
     final passwordController = TextEditingController();
 
     showDialog(
@@ -107,17 +99,18 @@ class _AffiliationPageState extends State<AffiliationPage> {
           children: [
             Text(
               isAffiliating
-                  ? '¿Está seguro que desea afiliarse a ${party['name']}?'
-                  : '¿Está seguro que desea desafiliarse de ${party['name']}?',
+                  ? '¿Está seguro que desea afiliarse a ${org.nombre}?'
+                  : '¿Está seguro que desea desafiliarse de ${org.nombre}?',
               style: const TextStyle(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 20),
             const Text(
-              'Contraseña de Transacción',
+              'PIN de Transacción',
               style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary),
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             TextField(
@@ -147,18 +140,14 @@ class _AffiliationPageState extends State<AffiliationPage> {
               if (expectedPin != null &&
                   passwordController.text == expectedPin) {
                 Navigator.pop(context);
-                _executeAction(party['id'], isAffiliating);
+                _executeAction(org, isAffiliating);
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('PIN de transacción incorrecto'),
-                    backgroundColor: AppColors.error,
-                  ),
-                );
+                _showMessage('PIN de transacción incorrecto', isError: true);
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: isAffiliating ? party['color'] : AppColors.error,
+              backgroundColor:
+                  isAffiliating ? AppColors.primaryBlue : AppColors.error,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
@@ -170,7 +159,7 @@ class _AffiliationPageState extends State<AffiliationPage> {
     );
   }
 
-  Future<void> _executeAction(String partyId, bool isAffiliating) async {
+  Future<void> _executeAction(OrganizacionDto org, bool isAffiliating) async {
     final dni = UserSession().currentIdentity?.dni;
     if (dni == null) {
       _showMessage('No hay sesión activa de ciudadano', isError: true);
@@ -183,31 +172,28 @@ class _AffiliationPageState extends State<AffiliationPage> {
         final created = await _afiliacionService.create(
           CreateAfiliacionRequest(
             cedula: dni,
-            organizacionId: int.parse(partyId),
+            organizacionId: org.organizacionId,
           ),
         );
+
         setState(() {
-          _affiliatedPartyId = partyId;
+          _affiliatedOrganizacionId = org.organizacionId;
           _activeAffiliacionId = created.afiliacionId;
         });
-        final partyName =
-            _allParties.firstWhere((p) => p['id'] == partyId)['name'];
-        _showMessage('Afiliación registrada en $partyName');
+        _showMessage('Afiliación registrada en ${org.nombre}');
       } else {
-        final activeId = _activeAffiliacionId;
-        if (activeId == null) {
+        if (_activeAffiliacionId == null) {
           _showMessage('No existe afiliación activa para anular',
               isError: true);
           return;
         }
-        await _afiliacionService.cancel(activeId);
-        final partyName =
-            _allParties.firstWhere((p) => p['id'] == partyId)['name'];
+
+        await _afiliacionService.cancel(_activeAffiliacionId!);
         setState(() {
-          _affiliatedPartyId = null;
           _activeAffiliacionId = null;
+          _affiliatedOrganizacionId = null;
         });
-        _showMessage('Afiliación anulada para $partyName');
+        _showMessage('Afiliación anulada para ${org.nombre}');
       }
     } catch (e) {
       _showMessage(e.toString(), isError: true);
@@ -228,9 +214,9 @@ class _AffiliationPageState extends State<AffiliationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredParties = _allParties.where((party) {
-      return party['name'].toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
+    final filtered = _organizaciones.where((o) =>
+        o.nombre.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+        o.tipo.toLowerCase().contains(_searchQuery.toLowerCase()));
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -251,7 +237,7 @@ class _AffiliationPageState extends State<AffiliationPage> {
               controller: _searchController,
               onChanged: (value) => setState(() => _searchQuery = value),
               decoration: InputDecoration(
-                hintText: 'Buscar partido...',
+                hintText: 'Buscar organización...',
                 prefixIcon:
                     const Icon(Icons.search, color: AppColors.textSecondary),
                 filled: true,
@@ -267,136 +253,127 @@ class _AffiliationPageState extends State<AffiliationPage> {
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
+                : ListView(
                     padding: const EdgeInsets.all(24),
-                    itemCount: filteredParties.length,
-                    itemBuilder: (context, index) {
-                      final party = filteredParties[index];
-                      return _buildPartyCard(party);
-                    },
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
+                    children: filtered.toList().asMap().entries.map((entry) {
+                      final idx = entry.key;
+                      final org = entry.value;
+                      final color = _palette[idx % _palette.length];
+                      final icon = _icons[idx % _icons.length];
+                      final isAffiliated =
+                          _affiliatedOrganizacionId == org.organizacionId;
 
-  Widget _buildPartyCard(Map<String, dynamic> party) {
-    final bool isThisAffiliated = _affiliatedPartyId == party['id'];
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: isThisAffiliated
-            ? Border.all(color: party['color'].withValues(alpha: 0.5), width: 2)
-            : null,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: party['color'].withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: party['imagePath'] != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(
-                          party['imagePath'],
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Icon(
-                              party['icon'],
-                              color: party['color'],
-                              size: 30),
-                        ),
-                      )
-                    : Icon(party['icon'], color: party['color'], size: 30),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            party['name'],
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
                             ),
-                          ),
+                          ],
+                          border: isAffiliated
+                              ? Border.all(
+                                  color: color.withValues(alpha: 0.5), width: 2)
+                              : null,
                         ),
-                        if (isThisAffiliated) ...[
-                          const SizedBox(width: 8),
-                          const Icon(Icons.check_circle,
-                              color: AppColors.success, size: 18),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      party['description'],
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: isThisAffiliated
-                ? OutlinedButton(
-                    onPressed: () => _showConfirmationDialog(party, false),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.error,
-                      side: const BorderSide(color: AppColors.error),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text('Desafiliarse',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  )
-                : ElevatedButton(
-                    onPressed: _affiliatedPartyId == null
-                        ? () => _showConfirmationDialog(party, true)
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: party['color'],
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: AppColors.surface,
-                      disabledForegroundColor:
-                          AppColors.textSecondary.withValues(alpha: 0.5),
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text('Afiliarse',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    color: color.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(icon, color: color, size: 28),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        org.nombre,
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Tipo: ${org.tipo}',
+                                        style: const TextStyle(
+                                            fontSize: 13,
+                                            color: AppColors.textSecondary),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (isAffiliated)
+                                  const Icon(Icons.check_circle,
+                                      color: AppColors.success, size: 20),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              width: double.infinity,
+                              child: isAffiliated
+                                  ? OutlinedButton(
+                                      onPressed: () =>
+                                          _showConfirmationDialog(org, false),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: AppColors.error,
+                                        side: const BorderSide(
+                                            color: AppColors.error),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12)),
+                                      ),
+                                      child: const Text('Desafiliarse',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                    )
+                                  : ElevatedButton(
+                                      onPressed: _affiliatedOrganizacionId ==
+                                              null
+                                          ? () =>
+                                              _showConfirmationDialog(org, true)
+                                          : null,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: color,
+                                        foregroundColor: Colors.white,
+                                        disabledBackgroundColor:
+                                            AppColors.surface,
+                                        disabledForegroundColor: AppColors
+                                            .textSecondary
+                                            .withValues(alpha: 0.5),
+                                        elevation: 0,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12)),
+                                      ),
+                                      child: const Text('Afiliarse',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                    ),
+                            )
+                          ],
+                        ),
+                      );
+                    }).toList(),
                   ),
           ),
         ],
