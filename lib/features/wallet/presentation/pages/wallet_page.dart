@@ -188,7 +188,9 @@ class _WalletPageState extends State<WalletPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            identity?.did ?? 'did:prism:pending',
+            (identity?.did.isNotEmpty ?? false)
+                ? identity!.did
+                : 'Pendiente de emisión SSI',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.8),
               fontSize: 12,

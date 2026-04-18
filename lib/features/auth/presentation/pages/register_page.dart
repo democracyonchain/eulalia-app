@@ -10,6 +10,8 @@ import 'package:eulalia_app/features/scanner/data/services/biometria_service.dar
 import 'package:eulalia_app/features/scanner/presentation/pages/biometric_capture_page.dart';
 import 'package:eulalia_app/features/wallet/data/models/ssi_model.dart';
 import 'package:eulalia_app/features/wallet/data/services/ssi_service.dart';
+import 'package:eulalia_app/features/wallet/data/services/secure_wallet_service.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter/material.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -33,12 +35,16 @@ class _RegisterPageState extends State<RegisterPage> {
   final _ssiService = SSIService();
   final _biometriaService = BiometriaService();
   final _registroEstadoService = RegistroEstadoService();
+  final _walletService = SecureWalletService();
+  String? _localDid;
 
   int _currentStep = 0;
   bool _isLoading = false;
   DateTime? _birthDate;
   SSIInvitationDto? _invitation;
   RegistroEstadoDto? _estadoRegistro;
+  String? _ssiStatus;
+  String? _ssiError;
   double? _lastLivenessScore;
 
   @override
@@ -110,10 +116,39 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _createWalletAndSSI() async {
     setState(() => _isLoading = true);
     try {
+      final hasWallet = await _walletService.hasWallet();
+      if (!hasWallet) {
+        final walletResult = await _walletService.generateWallet();
+        if (walletResult != null) {
+          _localDid = walletResult.$2;
+          _showSnack('Wallet local creada: $_localDid');
+        }
+      } else {
+        _localDid = await _walletService.getStoredDID();
+        _showSnack('Wallet existente: $_localDid');
+      }
+
       _invitation =
           await _ssiService.requestInvitation(_dniController.text.trim());
+      _ssiStatus = _invitation?.status;
+      _ssiError = null;
       setState(() => _currentStep = 2);
       _showSnack('Wallet SSI iniciada. Invitación generada');
+    } catch (e) {
+      _showSnack(e.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _refreshSsiStatus() async {
+    setState(() => _isLoading = true);
+    try {
+      final status = await _ssiService.getStatus(_dniController.text.trim());
+      setState(() {
+        _ssiStatus = status.status;
+        _ssiError = status.error;
+      });
     } catch (e) {
       _showSnack(e.toString());
     } finally {
@@ -158,18 +193,12 @@ class _RegisterPageState extends State<RegisterPage> {
           await _registroEstadoService.getStatus(_dniController.text.trim());
       setState(() => _estadoRegistro = estado);
 
-      final seedPhrase = _buildSeedPhrase();
-      final didFallback = _invitation?.invitationId.isNotEmpty == true
-          ? 'did:prism:${_invitation!.invitationId}'
-          : 'did:prism:pending';
-
       UserSession().setIdentity(
         UserIdentity(
           name: _nameController.text.trim(),
           dni: _dniController.text.trim(),
           pin: _pinController.text.trim(),
-          did: didFallback,
-          seedPhrase: seedPhrase,
+          did: _localDid ?? '',
         ),
       );
     } catch (e) {
@@ -177,24 +206,6 @@ class _RegisterPageState extends State<RegisterPage> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  List<String> _buildSeedPhrase() {
-    final words = [
-      'rio',
-      'sierra',
-      'luz',
-      'faro',
-      'voto',
-      'nacion',
-      'semilla',
-      'futuro',
-      'clave',
-      'nube',
-      'identidad',
-      'ciudadano',
-    ];
-    return words;
   }
 
   void _showSnack(String message) {
@@ -263,11 +274,38 @@ class _RegisterPageState extends State<RegisterPage> {
               children: [
                 Text('Invitation ID: ${_invitation!.invitationId}'),
                 Text('Estado: ${_invitation!.status}'),
+                if (_ssiStatus != null) Text('Estado SSI actual: $_ssiStatus'),
+                if (_ssiError != null && _ssiError!.isNotEmpty)
+                  Text('Error SSI: $_ssiError'),
+                if (_invitation!.invitationUrl.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Escanea con tu wallet:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: QrImageView(
+                      data: _invitation!.invitationUrl,
+                      version: QrVersions.auto,
+                      size: 200,
+                      backgroundColor: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _invitation!.invitationUrl,
+                    style: const TextStyle(fontSize: 10),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ],
             ),
           ),
         const SizedBox(height: 20),
         _buildPrimaryButton('Generar Wallet SSI', _createWalletAndSSI),
+        const SizedBox(height: 10),
+        _buildPrimaryButton('Consultar estado SSI', _refreshSsiStatus),
       ],
     );
   }

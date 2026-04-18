@@ -5,14 +5,12 @@ class UserIdentity {
   final String dni;
   final String pin;
   final String did;
-  final List<String> seedPhrase;
 
   UserIdentity({
     required this.name,
     required this.dni,
     required this.pin,
     required this.did,
-    required this.seedPhrase,
   });
 }
 

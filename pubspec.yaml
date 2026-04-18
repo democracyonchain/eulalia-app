@@ -48,8 +48,18 @@ dependencies:
   # Camera capture for on-device biometric pipeline
   camera: ^0.11.1
 
-  # Image processing for quality/liveness heuristics
+# Image processing for quality/liveness heuristics
   image: ^4.2.0
+
+  # QR Code generation and display
+  qr_flutter: ^4.1.0
+
+  # Secure storage for keys
+  flutter_secure_storage: ^9.2.2
+
+  # Crypto utilities
+  crypto: ^3.0.3
+  pointycastle: ^3.9.1
 
 dev_dependencies:
   flutter_test:
