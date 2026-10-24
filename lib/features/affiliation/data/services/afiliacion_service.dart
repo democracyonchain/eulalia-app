@@ -15,8 +15,9 @@ class AfiliacionService {
       final response = await _apiClient.get('/api/Afiliacion');
       final List<dynamic> data = response.data as List<dynamic>;
       return data.map((json) => AfiliacionDto.fromJson(json)).toList();
-    } on DioException catch (e) {
-      throw Exception('Error al obtener afiliaciones: ${e.message}');
+    } on DioException catch (_) {
+      throw Exception(
+          'No se pudieron cargar sus afiliaciones. Inténtelo nuevamente.');
     }
   }
 
@@ -30,7 +31,7 @@ class AfiliacionService {
       if (e.response?.statusCode == 404) {
         throw Exception('Afiliación no encontrada');
       }
-      throw Exception('Error al obtener afiliación: ${e.message}');
+      throw Exception('No se pudo cargar la afiliación. Inténtelo nuevamente.');
     }
   }
 
@@ -47,20 +48,22 @@ class AfiliacionService {
       if (e.response?.statusCode == 409) {
         throw Exception('Ya existe una afiliación activa para este ciudadano');
       }
-      throw Exception('Error al crear afiliación: ${e.message}');
+      throw Exception(
+          'No se pudo registrar la afiliación. Inténtelo nuevamente.');
     }
   }
 
   /// PUT /api/Afiliacion/{id}/anular
   /// Anular/Cancelar una afiliación
-  Future<void> cancel(int id) async {
+  Future<AfiliacionDto> cancel(int id) async {
     try {
-      await _apiClient.put('/api/Afiliacion/$id/anular');
+      final response = await _apiClient.put('/api/Afiliacion/$id/anular');
+      return AfiliacionDto.fromJson(response.data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
         throw Exception('Afiliación no encontrada');
       }
-      throw Exception('Error al anular afiliación: ${e.message}');
+      throw Exception('No se pudo anular la afiliación. Inténtelo nuevamente.');
     }
   }
 }

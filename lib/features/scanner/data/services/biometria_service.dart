@@ -27,7 +27,8 @@ class BiometriaService {
       if (e.response?.statusCode == 403) {
         throw Exception('No tiene permisos para registrar biometría');
       }
-      throw Exception('Error al registrar biometría: ${e.message}');
+      throw Exception(
+          'No se pudo registrar la biometría. Inténtelo nuevamente.');
     }
   }
 
@@ -51,11 +52,15 @@ class BiometriaService {
         },
       );
     } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map && data['mensaje'] is String) {
+        throw Exception(data['mensaje'] as String);
+      }
       if (e.response?.statusCode == 403) {
         throw Exception('No autorizado para registrar biometría propia');
       }
       throw Exception(
-          'Error al registrar biometría self-service: ${e.message}');
+          'No se pudo registrar la biometría. Inténtelo nuevamente.');
     }
   }
 
@@ -69,7 +74,8 @@ class BiometriaService {
       if (e.response?.statusCode == 404) {
         throw Exception('No se encontró registro biométrico');
       }
-      throw Exception('Error al consultar biometría: ${e.message}');
+      throw Exception(
+          'No se pudo consultar el estado biométrico. Inténtelo nuevamente.');
     }
   }
 }

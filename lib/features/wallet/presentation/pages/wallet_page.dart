@@ -4,6 +4,7 @@ import 'package:eulalia_app/features/affiliation/data/services/afiliacion_servic
 import 'package:eulalia_app/features/affiliation/data/services/organizacion_service.dart';
 import 'package:eulalia_app/features/auth/data/models/registro_estado_model.dart';
 import 'package:eulalia_app/features/auth/data/services/registro_estado_service.dart';
+import 'package:eulalia_app/features/auth/presentation/pages/register_page.dart';
 import 'package:flutter/material.dart';
 
 class WalletPage extends StatefulWidget {
@@ -116,19 +117,25 @@ class _WalletPageState extends State<WalletPage> {
                     AppColors.primaryBlue,
                   ),
                 ),
-                _buildCredentialItem(
+                _buildActionableCredentialItem(
                   'Estado SSI',
                   _estado?.ssiStatus ?? 'NotStarted',
                   Icons.verified_user,
                   _estado?.ssiOk == true
                       ? AppColors.success
                       : AppColors.warning,
+                  isComplete: _estado?.ssiOk == true,
+                  actionText: 'Continuar configuración SSI',
+                  step: 1,
                 ),
-                _buildCredentialItem(
+                _buildActionableCredentialItem(
                   'Estado Biométrico',
                   _estado?.bioStatus ?? 'not_started',
                   Icons.face,
                   _estado?.bioOk == true ? AppColors.success : Colors.orange,
+                  isComplete: _estado?.bioOk == true,
+                  actionText: 'Registrar biometría',
+                  step: 2,
                 ),
               ],
             ),
@@ -284,6 +291,58 @@ class _WalletPageState extends State<WalletPage> {
           ),
           Icon(Icons.chevron_right,
               color: AppColors.textSecondary.withValues(alpha: 0.3)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionableCredentialItem(
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color, {
+    required bool isComplete,
+    required String actionText,
+    required int step,
+  }) {
+    final item = _buildCredentialItem(title, subtitle, icon, color);
+    if (isComplete) return item;
+
+    return GestureDetector(
+      onTap: () {
+        final identity = UserSession().currentIdentity;
+        if (identity == null) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RegisterPage(
+              initialStep: step,
+              existingCitizenCedula: identity.dni,
+            ),
+          ),
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          item,
+          Padding(
+            padding: const EdgeInsets.only(left: 16, top: 0, bottom: 16),
+            child: Row(
+              children: [
+                Icon(Icons.play_arrow, size: 18, color: color),
+                const SizedBox(width: 4),
+                Text(
+                  actionText,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

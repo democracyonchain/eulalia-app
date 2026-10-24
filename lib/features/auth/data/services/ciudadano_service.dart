@@ -15,8 +15,9 @@ class CiudadanoService {
       final response = await _apiClient.get('/api/Ciudadano');
       final List<dynamic> data = response.data as List<dynamic>;
       return data.map((json) => CiudadanoDto.fromJson(json)).toList();
-    } on DioException catch (e) {
-      throw Exception('Error al obtener ciudadanos: ${e.message}');
+    } on DioException catch (_) {
+      throw Exception(
+          'No se pudieron cargar los ciudadanos. Inténtelo nuevamente.');
     }
   }
 
@@ -30,7 +31,8 @@ class CiudadanoService {
       if (e.response?.statusCode == 404) {
         throw Exception('Ciudadano no encontrado');
       }
-      throw Exception('Error al obtener ciudadano: ${e.message}');
+      throw Exception(
+          'No se pudo cargar la identidad ciudadana. Inténtelo nuevamente.');
     }
   }
 
@@ -47,7 +49,8 @@ class CiudadanoService {
       if (e.response?.statusCode == 409) {
         throw Exception('El ciudadano ya está registrado');
       }
-      throw Exception('Error al registrar ciudadano: ${e.message}');
+      throw Exception(
+          'No se pudo registrar el ciudadano. Inténtelo nuevamente.');
     }
   }
 }

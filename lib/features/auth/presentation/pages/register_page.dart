@@ -13,9 +13,17 @@ import 'package:eulalia_app/features/wallet/data/services/ssi_service.dart';
 import 'package:eulalia_app/features/wallet/data/services/secure_wallet_service.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+  final int initialStep;
+  final String? existingCitizenCedula;
+
+  const RegisterPage({
+    super.key,
+    this.initialStep = 0,
+    this.existingCitizenCedula,
+  });
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -38,7 +46,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _walletService = SecureWalletService();
   String? _localDid;
 
-  int _currentStep = 0;
+  late int _currentStep;
   bool _isLoading = false;
   DateTime? _birthDate;
   SSIInvitationDto? _invitation;
@@ -46,6 +54,13 @@ class _RegisterPageState extends State<RegisterPage> {
   String? _ssiStatus;
   String? _ssiError;
   double? _lastLivenessScore;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentStep = widget.initialStep.clamp(0, 3).toInt();
+    _dniController.text = widget.existingCitizenCedula ?? '';
+  }
 
   @override
   void dispose() {
@@ -107,7 +122,7 @@ class _RegisterPageState extends State<RegisterPage> {
       setState(() => _currentStep = 1);
       _showSnack('Registro base completado');
     } catch (e) {
-      _showSnack(e.toString());
+      _showSnack(_cleanError(e));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -132,10 +147,10 @@ class _RegisterPageState extends State<RegisterPage> {
           await _ssiService.requestInvitation(_dniController.text.trim());
       _ssiStatus = _invitation?.status;
       _ssiError = null;
-      setState(() => _currentStep = 2);
+      setState(() => _currentStep = 1);
       _showSnack('Wallet SSI iniciada. Invitación generada');
     } catch (e) {
-      _showSnack(e.toString());
+      _showSnack(_cleanError(e));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -147,10 +162,32 @@ class _RegisterPageState extends State<RegisterPage> {
       final status = await _ssiService.getStatus(_dniController.text.trim());
       setState(() {
         _ssiStatus = status.status;
-        _ssiError = status.error;
+        _ssiError = status.error ?? status.details;
       });
+      final detail = status.error ?? status.details;
+      _showSnack(detail == null || detail.isEmpty
+          ? 'Estado SSI: ${status.status}'
+          : 'Estado SSI: ${status.status} - $detail');
     } catch (e) {
-      _showSnack(e.toString());
+      _showSnack(_cleanError(e));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _retryInvitation() async {
+    setState(() => _isLoading = true);
+    try {
+      final invitation =
+          await _ssiService.retryInvitation(_dniController.text.trim());
+      setState(() {
+        _invitation = invitation;
+        _ssiStatus = invitation.status;
+        _ssiError = null;
+      });
+      _showSnack('Invitación SSI regenerada');
+    } catch (e) {
+      _showSnack(_cleanError(e));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -177,10 +214,15 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       _lastLivenessScore = result.livenessScore;
-      setState(() => _currentStep = 3);
+      final estado =
+          await _registroEstadoService.getStatus(_dniController.text.trim());
+      setState(() {
+        _estadoRegistro = estado;
+        _currentStep = 3;
+      });
       _showSnack('Biometría registrada correctamente');
     } catch (e) {
-      _showSnack(e.toString());
+      _showSnack(_cleanError(e));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -213,6 +255,13 @@ class _RegisterPageState extends State<RegisterPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
     );
+  }
+
+  String _cleanError(Object error) {
+    final message = error.toString();
+    return message.startsWith('Exception: ')
+        ? message.substring('Exception: '.length)
+        : message;
   }
 
   Widget _buildFormStep() {
@@ -280,7 +329,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 if (_invitation!.invitationUrl.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   const Text(
-                    'Escanea con tu wallet:',
+                    'Escanea con una wallet compatible o copia la invitación en la wallet CNE:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
@@ -293,10 +342,26 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  SelectableText(
                     _invitation!.invitationUrl,
                     style: const TextStyle(fontSize: 10),
                     textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      await Clipboard.setData(
+                        ClipboardData(text: _invitation!.invitationUrl),
+                      );
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Invitación copiada al portapapeles.'),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.copy),
+                    label: const Text('Copiar invitación para CNE'),
                   ),
                 ],
               ],
@@ -306,6 +371,14 @@ class _RegisterPageState extends State<RegisterPage> {
         _buildPrimaryButton('Generar Wallet SSI', _createWalletAndSSI),
         const SizedBox(height: 10),
         _buildPrimaryButton('Consultar estado SSI', _refreshSsiStatus),
+        if (_invitation != null) ...[
+          const SizedBox(height: 10),
+          _buildPrimaryButton('Regenerar invitación SSI', _retryInvitation),
+          const SizedBox(height: 10),
+          _buildPrimaryButton('Continuar a biometría', () async {
+            setState(() => _currentStep = 2);
+          }),
+        ],
       ],
     );
   }

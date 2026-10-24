@@ -34,7 +34,7 @@ class SecureWalletService {
         keyParts.add(random.nextInt(256));
       }
       final privateKey = base64.encode(keyParts);
-      
+
       final hash = sha256.convert(utf8.encode(privateKey));
       final publicKey = hash.toString();
       final did = 'did:eulalia:0x${publicKey.substring(0, 16)}';
@@ -82,7 +82,7 @@ class SecureWalletService {
       final key = utf8.encode(privateKey);
       final hmac = Hmac(sha256, key);
       final expected = hmac.convert(utf8.encode(transactionData)).toString();
-      
+
       return expected == signature;
     } catch (e) {
       return false;
