@@ -15,8 +15,9 @@ class OrganizacionService {
       return data
           .map((item) => OrganizacionDto.fromJson(item as Map<String, dynamic>))
           .toList();
-    } on DioException catch (e) {
-      throw Exception('Error al cargar organizaciones: ${e.message}');
+    } on DioException catch (_) {
+      throw Exception(
+          'No se pudieron cargar las organizaciones. Inténtelo nuevamente.');
     }
   }
 }

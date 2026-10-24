@@ -2,7 +2,7 @@ class CiudadanoDto {
   final String cedula;
   final String nombres;
   final String apellidos;
-  final String email;
+  final String? email;
   final String? telefono;
   final DateTime fechaNacimiento;
 
@@ -10,7 +10,7 @@ class CiudadanoDto {
     required this.cedula,
     required this.nombres,
     required this.apellidos,
-    required this.email,
+    this.email,
     this.telefono,
     required this.fechaNacimiento,
   });
@@ -21,7 +21,7 @@ class CiudadanoDto {
       cedula: json['cedula'] as String,
       nombres: json['nombres'] as String,
       apellidos: json['apellidos'] as String,
-      email: json['email'] as String,
+      email: json['email'] as String?,
       telefono: json['telefono'] as String?,
       fechaNacimiento: DateTime.parse(json['fechaNacimiento'] as String),
     );

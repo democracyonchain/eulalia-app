@@ -33,8 +33,11 @@ class RegistroService {
         },
       );
     } on DioException catch (e) {
-      final errorMessage = e.response?.data?.toString() ?? e.message;
-      throw Exception('No se pudo registrar el ciudadano: $errorMessage');
+      if (e.response?.statusCode == 409) {
+        throw Exception('El ciudadano ya está registrado.');
+      }
+      throw Exception(
+          'No se pudo completar el registro. Verifique los datos e inténtelo nuevamente.');
     }
   }
 }

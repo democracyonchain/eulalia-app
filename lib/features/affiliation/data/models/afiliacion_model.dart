@@ -4,6 +4,10 @@ class AfiliacionDto {
   final int organizacionId;
   final DateTime fechaAfiliacion;
   final String estado;
+  final String? cardanoEventId;
+  final String? cardanoEventType;
+  final String? cardanoStatus;
+  final String? cardanoTxHash;
 
   AfiliacionDto({
     required this.afiliacionId,
@@ -11,6 +15,10 @@ class AfiliacionDto {
     required this.organizacionId,
     required this.fechaAfiliacion,
     required this.estado,
+    this.cardanoEventId,
+    this.cardanoEventType,
+    this.cardanoStatus,
+    this.cardanoTxHash,
   });
 
   // From JSON (API response)
@@ -21,6 +29,10 @@ class AfiliacionDto {
       organizacionId: json['organizacionId'] as int,
       fechaAfiliacion: DateTime.parse(json['fechaAfiliacion'] as String),
       estado: json['estado'] as String,
+      cardanoEventId: json['cardanoEventId'] as String?,
+      cardanoEventType: json['cardanoEventType'] as String?,
+      cardanoStatus: json['cardanoStatus'] as String?,
+      cardanoTxHash: json['cardanoTxHash'] as String?,
     );
   }
 

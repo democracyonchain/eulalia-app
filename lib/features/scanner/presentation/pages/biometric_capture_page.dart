@@ -12,6 +12,8 @@ class BiometricCapturePage extends StatefulWidget {
 }
 
 class _BiometricCapturePageState extends State<BiometricCapturePage> {
+  // Calibrated for the current demo device/camera. Revisit before production.
+  static const double minimumQualityScore = 0.29;
   CameraController? _controller;
   bool _isLoading = true;
   bool _capturing = false;
@@ -49,7 +51,8 @@ class _BiometricCapturePageState extends State<BiometricCapturePage> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'No se pudo iniciar cámara frontal: $e';
+        _error =
+            'No se pudo iniciar la cámara frontal. Revise los permisos e inténtelo nuevamente.';
         _isLoading = false;
       });
     }
@@ -72,9 +75,10 @@ class _BiometricCapturePageState extends State<BiometricCapturePage> {
         secondFrameBytes: secondBytes,
       );
 
-      if (result.qualityScore < 0.45) {
+      if (result.qualityScore < minimumQualityScore) {
         throw Exception(
-            'Calidad de imagen insuficiente. Mejore iluminación y enfoque.');
+            'Calidad insuficiente (${result.qualityScore.toStringAsFixed(2)}). '
+            'Busque buena iluminación, limpie la cámara y mantenga el rostro centrado.');
       }
 
       if (!mounted) return;
@@ -82,7 +86,7 @@ class _BiometricCapturePageState extends State<BiometricCapturePage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error de captura biométrica: $e')),
+        SnackBar(content: Text('No se pudo capturar la biometría. $e')),
       );
     } finally {
       if (mounted) setState(() => _capturing = false);
@@ -116,7 +120,14 @@ class _BiometricCapturePageState extends State<BiometricCapturePage> {
                 )
               : Stack(
                   children: [
-                    Positioned.fill(child: CameraPreview(_controller!)),
+                    Positioned.fill(
+                      child: ColoredBox(
+                        color: Colors.black,
+                        child: Center(
+                          child: CameraPreview(_controller!),
+                        ),
+                      ),
+                    ),
                     Positioned.fill(
                       child: IgnorePointer(
                         child: Center(

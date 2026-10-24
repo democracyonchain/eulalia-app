@@ -1,15 +1,13 @@
-// No imports needed for this simple model
-
 class UserIdentity {
   final String name;
   final String dni;
-  final String pin;
+  final String? pin;
   final String did;
 
   UserIdentity({
     required this.name,
     required this.dni,
-    required this.pin,
+    this.pin,
     required this.did,
   });
 }

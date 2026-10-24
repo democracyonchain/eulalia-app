@@ -13,8 +13,9 @@ class RegistroEstadoService {
       final response =
           await _apiClient.get('/api/RegistroCiudadano/estado/$cedula');
       return RegistroEstadoDto.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw Exception('No se pudo consultar estado de registro: ${e.message}');
+    } on DioException catch (_) {
+      throw Exception(
+          'No se pudo consultar el estado del registro. Inténtelo nuevamente.');
     }
   }
 }
